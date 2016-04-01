@@ -25,7 +25,6 @@ database.authWithCustomToken(token, function (error) {
 // subscribe the user
 app.post('/api/alerts/subscribe/number/:number', function (request, response) {
     database.push(request.params.number);
-
     response.send("Subscribed " + request.params.number);
     console.log("Subscribed " + request.params.number);
 });
@@ -37,8 +36,13 @@ app.post('/api/alerts/unsubscribe/number/:number', function (request, response) 
 });
 
 // process the data by sending it to users
-app.get('/api/alerts/process/:data', function (req, res) {
-    res.send("Here's the data to push to users - " + data);
+app.get('/api/alerts/process/:data', function (request, response) {
+    database.once("value", function (numbers) {
+        numbers.forEach(function (n) {
+            console.log("Database data - \n" + n.child("*").val());
+        });
+    });
+    response.send("Here's the data to push to users - " + request.params.data);
 });
 
 
