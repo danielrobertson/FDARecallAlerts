@@ -1,8 +1,9 @@
-var Express = require('express');
-var mysql = require('mysql');
+const hapi = require('hapi');
+const mysql = require('mysql');
 
-// define web service
-var app = Express();
+// define the web service
+const server = new hapi.Server();
+server.connection({port: 8080});
 
 // connect to database
 var database = mysql.createConnection({
@@ -18,40 +19,49 @@ database.connect();
  define the api endpoints
  */
 
-// subscribe the user
-app.post('/api/alerts/subscribe/number/:number', function (request, response) {
-    var number = request.params.number;
-    var sql = 'insert into numbers (number) values ( ? );';
-    sql = mysql.format(sql, number);
+server.route({
+    method: 'POST',
+    path: '/api/alerts/subscribe/number/{number}',
+    handler: function (request, reply) {
+        var number = request.params.number;
+        var sql = 'insert into numbers (number) values ( ? );';
+        sql = mysql.format(sql, number);
 
-    runQuery(sql);
-    response.send('Subscribed number - ' + number);
+        runQuery(sql);
+        reply('Subscribed number - ' + number);
+    }
 });
 
-// unsubscribe the user
-app.post('/api/alerts/unsubscribe/number/:number', function (request, response) {
-    var number = request.params.number;
-    var sql = 'delete from numbers where number = ?';
-    sql = mysql.format(sql, number);
+server.route({
+    method: 'POST',
+    path: '/api/alerts/unsubscribe/number/{number}',
+    handler: function (request, reply) {
+        var number = request.params.number;
+        var sql = 'delete from numbers where number = ?';
+        sql = mysql.format(sql, number);
 
-    runQuery(sql);
-    response.send('Unsubscribed number - ' + number);
+        runQuery(sql);
+        reply('Unsubscribed number - ' + number);
+    }
 });
 
-// process the data by sending it to users
-app.get('/api/alerts/process/:data', function (request, response) {
-    retrieveNumbers(function (err, data) {
-        if (err) {
-            throw err;
-        }
+server.route({
+    method: 'GET',
+    path: '/api/alerts/process/{data}',
+    handler: function (request, reply) {
+        retrieveNumbers(function (err, data) {
+            if (err) {
+                throw err;
+            }
 
-        data.forEach(function (row) {
-            // send text to row.number
-            console.log('Number - ' + row.number);
+            data.forEach(function (row) {
+                // send text to row.number
+                console.log('Number - ' + row.number);
+            });
         });
-    });
 
-    response.send('Subscribers have been alerted');
+        reply('Subscribers have been alerted');
+    }
 });
 
 /**
@@ -82,9 +92,6 @@ var retrieveNumbers = function (callback) {
 /**
  start the server
  */
-
-var server = app.listen(8080, function () {
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log('Server listening at http://%s:%s', host, port)
+server.start(function () {
+    console.log('Server running at:', server.info.uri);
 });
