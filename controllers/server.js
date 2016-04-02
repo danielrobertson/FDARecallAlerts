@@ -1,22 +1,18 @@
 var Express = require('express');
-var Firebase = require('firebase');
-var FirebaseTokenGenerator = require("firebase-token-generator");
+var mysql = require('mysql');
 
 // define web service
 var app = Express();
 
 // connect to database
-var database = new Firebase(process.env.FIREBASE_URL);
-var tokenGenerator = new FirebaseTokenGenerator(process.env.FIREBASE_SECRET);
-var token = tokenGenerator.createToken({uid: "dr"});
-database.authWithCustomToken(token, function (error) {
-    if (error) {
-        console.log("Firebase login failed\n", error);
-    } else {
-        console.log("Firebase login succeeded");
-    }
+var database = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
+database.connect();
 
 /**
  define the api endpoints
@@ -24,27 +20,63 @@ database.authWithCustomToken(token, function (error) {
 
 // subscribe the user
 app.post('/api/alerts/subscribe/number/:number', function (request, response) {
-    database.push(request.params.number);
-    response.send("Subscribed " + request.params.number);
-    console.log("Subscribed " + request.params.number);
+    var number = request.params.number;
+    var sql = 'insert into numbers (number) values ( ? );';
+    sql = mysql.format(sql, number);
+
+    runQuery(sql);
+    response.send('Subscribed number - ' + number);
 });
 
 // unsubscribe the user
 app.post('/api/alerts/unsubscribe/number/:number', function (request, response) {
-    response.send("Unsubscribed - " + request.params.number);
-    console.log("Unsubscribed - " + request.params.number);
+    var number = request.params.number;
+    var sql = 'delete from numbers where number = ?';
+    sql = mysql.format(sql, number);
+
+    runQuery(sql);
+    response.send('Unsubscribed number - ' + number);
 });
 
 // process the data by sending it to users
 app.get('/api/alerts/process/:data', function (request, response) {
-    database.once("value", function (dataSnapshot) {
-        dataSnapshot.forEach(function (numberEntry) {
-            var number = numberEntry.val();
-            console.log("processing number - " + number);
+    retrieveNumbers(function (err, data) {
+        if (err) {
+            throw err;
+        }
+
+        data.forEach(function (row) {
+            // send text to row.number
+            console.log('Number - ' + row.number);
         });
     });
-    response.send("Here's the data to push to users - " + request.params.data);
+
+    response.send('Subscribers have been alerted');
 });
+
+/**
+ * helper functions
+ */
+
+var runQuery = function (sql) {
+    database.query(sql, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
+};
+
+var retrieveNumbers = function (callback) {
+    var sql = 'select number from numbers';
+    database.query(sql, function (err, data) {
+        if (err) {
+            callback(err, null);
+        }
+        else {
+            callback(null, data);
+        }
+    });
+};
 
 
 /**
@@ -54,5 +86,5 @@ app.get('/api/alerts/process/:data', function (request, response) {
 var server = app.listen(8080, function () {
     var host = server.address().address;
     var port = server.address().port;
-    console.log("Server listening at http://%s:%s", host, port)
+    console.log('Server listening at http://%s:%s', host, port)
 });
