@@ -37,9 +37,10 @@ app.post('/api/alerts/unsubscribe/number/:number', function (request, response) 
 
 // process the data by sending it to users
 app.get('/api/alerts/process/:data', function (request, response) {
-    database.once("value", function (numbers) {
-        numbers.forEach(function (n) {
-            console.log("Database data - \n" + n.child("*").val());
+    database.once("value", function (dataSnapshot) {
+        dataSnapshot.forEach(function (numberEntry) {
+            var number = numberEntry.val();
+            console.log("processing number - " + number);
         });
     });
     response.send("Here's the data to push to users - " + request.params.data);
