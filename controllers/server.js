@@ -24,6 +24,7 @@ server.route({
     method: 'GET',
     path: '/',
     handler: function (request, reply) {
+        console.log('Serving index.html');
         return reply.file('./../index.html');
     }
 });
