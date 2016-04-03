@@ -1,11 +1,6 @@
 var hapi = require('hapi');
 var mysql = require('mysql');
 
-
-// define the web service
-var server = new hapi.Server();
-server.connection({port: 8080});
-
 // connect to database
 var database = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -17,8 +12,10 @@ var database = mysql.createConnection({
 database.connect();
 
 /***************************
- * define the api endpoints
+ * define the web service
  ***************************/
+var server = new hapi.Server();
+server.connection({port: 8080});
 
 /**
  * Subscribes the given phone number by adding it to the database
