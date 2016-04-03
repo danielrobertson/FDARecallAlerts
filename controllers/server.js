@@ -16,8 +16,12 @@ var database = mysql.createConnection({
 
 database.connect();
 
+/***************************
+ * define the api endpoints
+ ***************************/
+
 /**
- define the api endpoints
+ * Subscribes the given phone number by adding it to the database
  */
 server.route({
     method: 'POST',
@@ -32,6 +36,9 @@ server.route({
     }
 });
 
+/**
+ * Unsubscribes the given phone number by removing it from the the database
+ */
 server.route({
     method: 'POST',
     path: '/api/alerts/unsubscribe/number/{number}',
@@ -45,6 +52,9 @@ server.route({
     }
 });
 
+/**
+ * Sends an alert to all of the subscribed phone numbers with the provided data
+ */
 server.route({
     method: 'GET',
     path: '/api/alerts/process/{data}',
@@ -64,9 +74,9 @@ server.route({
     }
 });
 
-/**
+/***************************
  * helper functions
- */
+ ***************************/
 var runQuery = function (sql) {
     database.query(sql, function (err) {
         if (err) {
@@ -88,9 +98,9 @@ var retrieveNumbers = function (callback) {
 };
 
 
-/**
+/***************************
  * start the server
- */
+ ***************************/
 server.start(function () {
     console.log('Server running at:', server.info.uri);
 });
