@@ -1,11 +1,10 @@
 var hapi = require('hapi');
 var mysql = require('mysql');
-var inert = require('inert');
+
 
 // define the web service
 var server = new hapi.Server();
 server.connection({port: 8080});
-server.register(inert, () => {});
 
 // connect to database
 var database = mysql.createConnection({
@@ -16,18 +15,6 @@ var database = mysql.createConnection({
 });
 
 database.connect();
-
-/**
- * host the front-end
- */
-server.route({
-    method: 'GET',
-    path: '/',
-    handler: function (request, reply) {
-        console.log('Serving index.html');
-        return reply.file('./../index.html');
-    }
-});
 
 /**
  define the api endpoints
