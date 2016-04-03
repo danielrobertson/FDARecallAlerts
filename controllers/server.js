@@ -1,9 +1,11 @@
-const hapi = require('hapi');
-const mysql = require('mysql');
+var hapi = require('hapi');
+var mysql = require('mysql');
+var inert = require('inert');
 
 // define the web service
-const server = new hapi.Server();
+var server = new hapi.Server();
 server.connection({port: 8080});
+server.register(inert, () => {});
 
 // connect to database
 var database = mysql.createConnection({
@@ -16,9 +18,19 @@ var database = mysql.createConnection({
 database.connect();
 
 /**
+ * host the front-end
+ */
+server.route({
+    method: 'GET',
+    path: '/',
+    handler: function (request, reply) {
+        return reply.file('./../index.html');
+    }
+});
+
+/**
  define the api endpoints
  */
-
 server.route({
     method: 'POST',
     path: '/api/alerts/subscribe/number/{number}',
@@ -67,7 +79,6 @@ server.route({
 /**
  * helper functions
  */
-
 var runQuery = function (sql) {
     database.query(sql, function (err) {
         if (err) {
@@ -90,7 +101,7 @@ var retrieveNumbers = function (callback) {
 
 
 /**
- start the server
+ * start the server
  */
 server.start(function () {
     console.log('Server running at:', server.info.uri);
