@@ -7,15 +7,29 @@
 
     <script>
         $(function() {
-            $("#btn").click(function() {
+            $("#btn-subscribe").click(function() {
+                var subscribeEndpoint = 'http://104.236.3.239:8080/api/alerts/subscribe/number/';
                 $.ajax({
-                    url: '' + $("#inputForm").val(),
-                    type: 'GET',
+                    url: subscribeEndpoint + $("#inputForm").val(),
+                    type: 'POST',
                     success: function(response) {
-                        $("#results").text(response);
+                        alert(response);
                     },
                     error: function(error) {
-                        alert('something bad');
+                        alert(error);
+                    }
+                });
+            });
+            $("#btn-unsubscribe").click(function() {
+                var unsubscribeEndpoint = 'http://104.236.3.239:8080/api/alerts/unsubscribe/number/';
+                $.ajax({
+                    url: unsubscribeEndpoint + $("#inputForm").val(),
+                    type: 'POST',
+                    success: function(response) {
+                        alert(response);
+                    },
+                    error: function(error) {
+                        alert(error);
                     }
                 });
             });
@@ -77,8 +91,11 @@
 <div class="Absolute-Center is-Responsive">
     <h1>Enter a Phone Number</h1>
     <input id="inputForm" type="text" class="form-control cd">
-    <button id="btn" class="btn btn-primary btn-lg btn-center">Subscribe</button>
-    <p id="results"></p>
+    <div id="buttons">
+        <button id="btn-subscribe" class="btn btn-primary btn-lg btn-center">Subscribe</button>
+        <button id="btn-unsubscribe" class="btn btn-primary btn-lg btn-center">Unubscribe</button>
+    </div>
+
 </div>
 </body>
 
