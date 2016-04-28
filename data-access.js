@@ -29,7 +29,7 @@ function retrieveAllNumbers(callback) {
  * Removes a number from the database 
  */ 
 function removeNumber(number) {
-	var sql = 'delete from numbers where number = ?';
+    var sql = 'delete from numbers where number = ?';
     sql = mysql.format(sql, number);
 
     // TODO bubble errors up 
@@ -40,7 +40,7 @@ function removeNumber(number) {
  * Adds a number to the database 
  */ 
 function addNumber(number) {
-	var sql = 'insert into numbers (number) values ( ? );';
+    var sql = 'insert into numbers (number) values ( ? );';
     sql = mysql.format(sql, number);
 
     executeQuery(sql);
