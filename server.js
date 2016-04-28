@@ -1,16 +1,5 @@
 var hapi = require('hapi');
-var mysql = require('mysql');
 var dao = require('./data-access'); 
-
-// connect to database
-var database = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
-
-database.connect();
 
 /***************************
  * define the web service
@@ -26,10 +15,7 @@ server.route({
     path: '/api/alerts/subscribe/number/{number}',
     handler: function (request, reply) {
         var number = request.params.number;
-        var sql = 'insert into numbers (number) values ( ? );';
-        sql = mysql.format(sql, number);
-
-        runQuery(sql);
+        dao.addNumber(number); 
         reply('Subscribed number - ' + number);
     }
 });
@@ -42,10 +28,7 @@ server.route({
     path: '/api/alerts/unsubscribe/number/{number}',
     handler: function (request, reply) {
         var number = request.params.number;
-        var sql = 'delete from numbers where number = ?';
-        sql = mysql.format(sql, number);
-
-        runQuery(sql);
+        dao.removeNumber(number); 
         reply('Unsubscribed number - ' + number);
     }
 });
@@ -72,19 +55,6 @@ server.route({
         reply('Subscribers have been alerted');
     }
 });
-
-/***************************
- * helper functions
- ***************************/
-var runQuery = function (sql) {
-    database.query(sql, function (err) {
-        if (err) {
-            throw err;
-        }
-    });
-};
-
-
 
 
 /***************************
