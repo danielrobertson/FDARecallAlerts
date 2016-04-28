@@ -1,0 +1,11 @@
+{
+    "name": "FDARecallAlerts",
+    "version": "1.0.0",
+    "main": "server.js",
+    "author": "danielrobertson",
+    "license": "MIT",
+    "dependencies": {
+        "hapi": "13.3.0", 
+        "mysql": "2.10.2"
+    }
+}
