@@ -1,5 +1,6 @@
 var hapi = require('hapi');
 var mysql = require('mysql');
+var dao = require('./data-access'); 
 
 // connect to database
 var database = mysql.createConnection({
@@ -15,7 +16,7 @@ database.connect();
  * define the web service
  ***************************/
 var server = new hapi.Server();
-server.connection({port: 8080});
+server.connection({port: 8005});
 
 /**
  * Subscribes the given phone number by adding it to the database
@@ -56,13 +57,14 @@ server.route({
     method: 'GET',
     path: '/api/alerts/process/{data}',
     handler: function (request, reply) {
-        retrieveNumbers(function (err, data) {
+        dao.retrieveAllNumbers(function (err, data) {
             if (err) {
+                reply('An error occurred processing alerts'); 
                 throw err;
             }
 
             data.forEach(function (row) {
-                // send text to row.number
+                // TODO send text to row.number
                 console.log('Number - ' + row.number);
             });
         });
@@ -82,17 +84,7 @@ var runQuery = function (sql) {
     });
 };
 
-var retrieveNumbers = function (callback) {
-    var sql = 'select number from numbers';
-    database.query(sql, function (err, data) {
-        if (err) {
-            callback(err, null);
-        }
-        else {
-            callback(null, data);
-        }
-    });
-};
+
 
 
 /***************************
